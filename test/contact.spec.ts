@@ -123,4 +123,73 @@ describe('ContactController', () => {
       expect(response.body.data.phone).toBe(contact.phone);
     });
   });
+
+  describe('PUT /api/contacts/:contactId', () => {
+    beforeEach(async () => {
+      await testService.createUser();
+      await testService.createContact();
+    });
+
+    afterEach(async () => {
+      await testService.deleteContact();
+      await testService.deleteUser();
+    });
+
+    it('Should be rejected if id not number', async () => {
+      const response = await request(app.getHttpServer())
+        .put(`/api/contacts/one`)
+        .set('Authorization', 'test')
+        .send({
+          first_name: 'testedit',
+          last_name: 'testedit',
+          email: 'testedit@test.com',
+          phone: '0000',
+        });
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('Should be rejected if id not found', async () => {
+      const contact = await testService.getContact();
+      const response = await request(app.getHttpServer())
+        .put(`/api/contacts/${contact.id + 1}`)
+        .set('Authorization', 'test')
+        .send({
+          first_name: 'testedit',
+          last_name: 'testedit',
+          email: 'testedit@test.com',
+          phone: '0000',
+        });
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('Should be able to update contact', async () => {
+      const contact = await testService.getContact();
+      const response = await request(app.getHttpServer())
+        .put(`/api/contacts/${contact.id}`)
+        .set('Authorization', 'test')
+        .send({
+          first_name: 'testedit',
+          last_name: 'testedit',
+          email: 'testedit@test.com',
+          phone: '0000',
+        });
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body.data.id).toBe(contact.id);
+      expect(response.body.data.first_name).toBe('testedit');
+      expect(response.body.data.last_name).toBe('testedit');
+      expect(response.body.data.email).toBe('testedit@test.com');
+      expect(response.body.data.phone).toBe('0000');
+    });
+  });
 });
