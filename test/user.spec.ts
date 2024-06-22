@@ -29,6 +29,10 @@ describe('UserController', () => {
       await testService.deleteUser();
     });
 
+    afterEach(async () => {
+      await testService.deleteUser();
+    });
+
     it('Should be rejected if request invalid', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/users')
@@ -43,9 +47,7 @@ describe('UserController', () => {
       expect(response.status).toBe(400);
       expect(response.body.errors).toBeDefined();
     });
-  });
 
-  describe('POST /api/users', () => {
     it('Should be able to register', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/users')
@@ -61,15 +63,10 @@ describe('UserController', () => {
       expect(response.body.data.username).toBe('test');
       expect(response.body.data.name).toBe('test');
     });
-  });
-
-  describe('POST /api/users', () => {
-    beforeEach(async () => {
-      await testService.deleteUser();
-      await testService.createUser();
-    });
 
     it('Should be rejected if user already exists', async () => {
+      await testService.createUser();
+
       const response = await request(app.getHttpServer())
         .post('/api/users')
         .send({
@@ -81,6 +78,74 @@ describe('UserController', () => {
       logger.info(response.body);
 
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(response.body.errors).toBeDefined();
+    });
+  });
+
+  describe('POST /api/users/login', () => {
+    beforeEach(async () => {
+      await testService.createUser();
+    });
+
+    afterEach(async () => {
+      await testService.deleteUser();
+    });
+
+    it('Should be rejected if request invalid', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/api/users/login')
+        .send({
+          username: '',
+          password: ''
+        });
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(400);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('Should be able to login', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/api/users/login')
+        .send({
+          username: 'test',
+          password: 'test'
+        });
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body.data.username).toBe('test');
+      expect(response.body.data.name).toBe('test');
+      expect(response.body.data.token).toBeDefined();
+    });
+
+    it('Should be rejected if username not found', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/api/users/login')
+        .send({
+          username: 'notfound',
+          password: 'test'
+        });
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('Should be rejected if password is invalid', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/api/users/login')
+        .send({
+          username: 'test',
+          password: 'is invalid'
+        });
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
       expect(response.body.errors).toBeDefined();
     });
   });
