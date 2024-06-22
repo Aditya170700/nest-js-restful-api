@@ -72,4 +72,55 @@ describe('ContactController', () => {
       expect(response.body.data.phone).toBe('089626262626');
     });
   });
+
+  describe('GET /api/contacts/:contactId', () => {
+    beforeEach(async () => {
+      await testService.createUser();
+      await testService.createContact();
+    });
+
+    afterEach(async () => {
+      await testService.deleteContact();
+      await testService.deleteUser();
+    });
+
+    it('Should be rejected if id not number', async () => {
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts/one`)
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('Should be rejected if id not found', async () => {
+      const contact = await testService.getContact();
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts/${contact.id + 1}`)
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('Should be able to get contact', async () => {
+      const contact = await testService.getContact();
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts/${contact.id}`)
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body.data.id).toBe(contact.id);
+      expect(response.body.data.first_name).toBe(contact.first_name);
+      expect(response.body.data.last_name).toBe(contact.last_name);
+      expect(response.body.data.email).toBe(contact.email);
+      expect(response.body.data.phone).toBe(contact.phone);
+    });
+  });
 });
