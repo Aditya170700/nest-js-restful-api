@@ -70,4 +70,11 @@ export class UserService {
       token: user.token
     }
   }
+
+  async get(user: User): Promise<UserResponse> {
+    return {
+      username: user.username,
+      name: user.name,
+    }
+  }
 }

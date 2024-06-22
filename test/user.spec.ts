@@ -44,7 +44,7 @@ describe('UserController', () => {
 
       logger.info(response.body);
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(HttpStatus.BAD_REQUEST);
       expect(response.body.errors).toBeDefined();
     });
 
@@ -101,7 +101,7 @@ describe('UserController', () => {
 
       logger.info(response.body);
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(HttpStatus.BAD_REQUEST);
       expect(response.body.errors).toBeDefined();
     });
 
@@ -147,6 +147,39 @@ describe('UserController', () => {
 
       expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
       expect(response.body.errors).toBeDefined();
+    });
+  });
+
+  describe('GET /api/users/current', () => {
+    beforeEach(async () => {
+      await testService.createUser();
+    });
+
+    afterEach(async () => {
+      await testService.deleteUser();
+    });
+
+    it('Should be rejected if token invalid', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/users/current')
+        .set('Authorization', 'token invalid');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('Should be able to get user', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/users/current')
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body.data.username).toBe('test');
+      expect(response.body.data.name).toBe('test');
     });
   });
 });
