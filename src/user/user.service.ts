@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { LoginUserRequest, RegisterUserRequest, UserResponse } from '../model/user.model';
+import { LoginUserRequest, RegisterUserRequest, UpdateUserRequest, UserResponse } from '../model/user.model';
 import { ValidationService } from '../common/validation.service';
 import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
@@ -17,7 +17,7 @@ export class UserService {
     private prismaService: PrismaService) {}
 
   async register(request: RegisterUserRequest): Promise<UserResponse> {
-    this.logger.info(`[UserService.register] ${JSON.stringify(request)}`);
+    this.logger.debug(`[UserService.register] ${JSON.stringify(request)}`);
     const data = this.validationService.validate(UserValidation.REGISTER, request);
 
     const isExists = (await this.prismaService.user.count({
@@ -41,7 +41,7 @@ export class UserService {
   }
 
   async login(request: LoginUserRequest): Promise<UserResponse> {
-    this.logger.info(`[UserService.login] ${JSON.stringify(request)}`);
+    this.logger.debug(`[UserService.login] ${JSON.stringify(request)}`);
     const data = this.validationService.validate(UserValidation.LOGIN, request);
 
     let user = (await this.prismaService.user.findUnique({
@@ -72,6 +72,32 @@ export class UserService {
   }
 
   async get(user: User): Promise<UserResponse> {
+    this.logger.debug(`[UserService.get] ${JSON.stringify(user)}`);
+    return {
+      username: user.username,
+      name: user.name,
+    }
+  }
+
+  async update(user: User, request: UpdateUserRequest): Promise<UserResponse> {
+    this.logger.debug(`[UserService.update] ${JSON.stringify(request)}`);
+    const data = this.validationService.validate(UserValidation.UPDATE, request);
+
+    if (data.name) {
+      user.name = data.name;
+    }
+
+    if (data.password) {
+      user.password = await bcrypt.hash(data.password, 10);
+    }
+
+    await this.prismaService.user.update({
+      where: {
+        username: user.username
+      },
+      data: user
+    });
+
     return {
       username: user.username,
       name: user.name,
