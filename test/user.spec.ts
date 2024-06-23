@@ -39,7 +39,7 @@ describe('UserController', () => {
         .send({
           name: '',
           username: '',
-          password: ''
+          password: '',
         });
 
       logger.info(response.body);
@@ -54,7 +54,7 @@ describe('UserController', () => {
         .send({
           name: 'test',
           username: 'test',
-          password: 'test'
+          password: 'test',
         });
 
       logger.info(response.body);
@@ -72,7 +72,7 @@ describe('UserController', () => {
         .send({
           name: 'test',
           username: 'test',
-          password: 'test'
+          password: 'test',
         });
 
       logger.info(response.body);
@@ -96,7 +96,7 @@ describe('UserController', () => {
         .post('/api/users/login')
         .send({
           username: '',
-          password: ''
+          password: '',
         });
 
       logger.info(response.body);
@@ -110,7 +110,7 @@ describe('UserController', () => {
         .post('/api/users/login')
         .send({
           username: 'test',
-          password: 'test'
+          password: 'test',
         });
 
       logger.info(response.body);
@@ -126,7 +126,7 @@ describe('UserController', () => {
         .post('/api/users/login')
         .send({
           username: 'notfound',
-          password: 'test'
+          password: 'test',
         });
 
       logger.info(response.body);
@@ -140,7 +140,7 @@ describe('UserController', () => {
         .post('/api/users/login')
         .send({
           username: 'test',
-          password: 'is invalid'
+          password: 'is invalid',
         });
 
       logger.info(response.body);
@@ -198,7 +198,7 @@ describe('UserController', () => {
         .set('Authorization', 'token invalid')
         .send({
           name: 'test',
-          password: 'test'
+          password: 'test',
         });
 
       logger.info(response.body);
@@ -212,7 +212,7 @@ describe('UserController', () => {
         .patch('/api/users/current')
         .set('Authorization', 'test')
         .send({
-          name: 'test updated'
+          name: 'test updated',
         });
 
       logger.info(response.body);
@@ -227,7 +227,7 @@ describe('UserController', () => {
         .patch('/api/users/current')
         .set('Authorization', 'test')
         .send({
-          password: 'test-update'
+          password: 'test-update',
         });
 
       logger.info(response.body);
@@ -240,7 +240,7 @@ describe('UserController', () => {
         .post('/api/users/login')
         .send({
           username: 'test',
-          password: 'test-update'
+          password: 'test-update',
         });
 
       logger.info(response.body);
@@ -257,7 +257,7 @@ describe('UserController', () => {
         .set('Authorization', 'test')
         .send({
           name: '',
-          password: 'test'
+          password: 'test',
         });
 
       logger.info(response.body);
@@ -272,7 +272,7 @@ describe('UserController', () => {
         .set('Authorization', 'test')
         .send({
           name: 'test',
-          password: ''
+          password: '',
         });
 
       logger.info(response.body);

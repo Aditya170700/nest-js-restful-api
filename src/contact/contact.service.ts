@@ -21,15 +21,21 @@ export class ContactService {
     @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
   ) {}
 
-  async create(user: User, request: CreateContactRequest): Promise<ContactResponse> {
+  async create(
+    user: User,
+    request: CreateContactRequest,
+  ): Promise<ContactResponse> {
     this.logger.debug(`[ContactService.create] ${JSON.stringify(request)}`);
-    const data = this.validationService.validate(ContactValidation.CREATE, request);
+    const data = this.validationService.validate(
+      ContactValidation.CREATE,
+      request,
+    );
 
     const result = (await this.prismaService.contact.create({
       data: {
         ...data,
-        ...{username:user.username}
-      }
+        ...{ username: user.username },
+      },
     })) as Contact;
 
     return this.toContactResponse(result);
@@ -37,22 +43,28 @@ export class ContactService {
 
   async get(user: User, contactId: number): Promise<ContactResponse> {
     this.logger.debug(`[ContactService.get] ${contactId}`);
-    let result = await this.checkContact(contactId, user.username);
+    const result = await this.checkContact(contactId, user.username);
 
     return this.toContactResponse(result);
   }
 
-  async update(user: User, request: UpdateContactRequest): Promise<ContactResponse> {
+  async update(
+    user: User,
+    request: UpdateContactRequest,
+  ): Promise<ContactResponse> {
     this.logger.debug(`[ContactService.update] ${JSON.stringify(request)}`);
-    const data = this.validationService.validate(ContactValidation.UPDATE, request);
+    const data = this.validationService.validate(
+      ContactValidation.UPDATE,
+      request,
+    );
     let result = await this.checkContact(request.id, user.username);
 
     result = (await this.prismaService.contact.update({
       where: {
         id: result.id,
       },
-      data: data
-    }) as Contact);
+      data: data,
+    })) as Contact;
 
     return this.toContactResponse(result);
   }
@@ -64,15 +76,21 @@ export class ContactService {
     result = (await this.prismaService.contact.delete({
       where: {
         id: result.id,
-      }
-    }) as Contact);
+      },
+    })) as Contact;
 
     return this.toContactResponse(result);
   }
 
-  async search(user: User, request: SearchContactRequest): Promise<WebResponse<ContactResponse[]>> {
+  async search(
+    user: User,
+    request: SearchContactRequest,
+  ): Promise<WebResponse<ContactResponse[]>> {
     this.logger.debug(`[ContactService.search] ${JSON.stringify(request)}`);
-    const data = this.validationService.validate(ContactValidation.SEARCH, request);
+    const data = this.validationService.validate(
+      ContactValidation.SEARCH,
+      request,
+    );
 
     const filters = [];
 
@@ -82,14 +100,14 @@ export class ContactService {
           {
             first_name: {
               contains: data.name,
-            }
+            },
           },
           {
             last_name: {
               contains: data.name,
-            }
-          }
-        ]
+            },
+          },
+        ],
       });
     }
 
@@ -97,7 +115,7 @@ export class ContactService {
       filters.push({
         email: {
           contains: data.email,
-        }
+        },
       });
     }
 
@@ -105,7 +123,7 @@ export class ContactService {
       filters.push({
         phone: {
           contains: data.phone,
-        }
+        },
       });
     }
 
@@ -114,27 +132,27 @@ export class ContactService {
     const results = await this.prismaService.contact.findMany({
       where: {
         username: user.username,
-        AND: filters
+        AND: filters,
       },
       take: data.size,
       skip: skip,
     });
 
-    const total =  await this.prismaService.contact.count({
+    const total = await this.prismaService.contact.count({
       where: {
         username: user.username,
-        AND: filters
-      }
+        AND: filters,
+      },
     });
 
     return {
-      data: results.map(contact => this.toContactResponse(contact)),
+      data: results.map((contact) => this.toContactResponse(contact)),
       paging: {
         current_page: data.page,
         size: data.size,
         total_page: Math.ceil(total / data.size),
-      }
-    }
+      },
+    };
   }
 
   private toContactResponse(contact: Contact): ContactResponse {
@@ -144,18 +162,22 @@ export class ContactService {
       last_name: contact.last_name,
       email: contact.email,
       phone: contact.phone,
-    }
+    };
   }
 
-  public async checkContact(contactId: number, username: string): Promise<Contact> {
-    let result = (await this.prismaService.contact.findFirst({
+  public async checkContact(
+    contactId: number,
+    username: string,
+  ): Promise<Contact> {
+    const result = (await this.prismaService.contact.findFirst({
       where: {
         id: contactId,
-        username: username
-      }
-    }) as Contact);
+        username: username,
+      },
+    })) as Contact;
 
-    if (!result) throw new HttpException('Contact not found', HttpStatus.NOT_FOUND);
+    if (!result)
+      throw new HttpException('Contact not found', HttpStatus.NOT_FOUND);
 
     return result;
   }

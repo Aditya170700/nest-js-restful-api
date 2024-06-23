@@ -4,8 +4,7 @@ import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
-  constructor(private prismaService: PrismaService) {
-  }
+  constructor(private prismaService: PrismaService) {}
 
   async use(req: any, res: any, next: (error?: any) => void) {
     const token = req.headers['authorization'] as string;
@@ -13,8 +12,8 @@ export class AuthMiddleware implements NestMiddleware {
     if (token) {
       const user = (await this.prismaService.user.findFirst({
         where: {
-          token: token
-        }
+          token: token,
+        },
       })) as User;
 
       if (user) req.user = user;

@@ -4,27 +4,32 @@ import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 @Injectable()
-export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, string> implements OnModuleInit {
-  constructor(@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger) {
+export class PrismaService
+  extends PrismaClient<Prisma.PrismaClientOptions, string>
+  implements OnModuleInit
+{
+  constructor(
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+  ) {
     super({
       log: [
         {
           emit: 'event',
-          level: 'info'
+          level: 'info',
         },
         {
           emit: 'event',
-          level: 'warn'
+          level: 'warn',
         },
         {
           emit: 'event',
-          level: 'error'
+          level: 'error',
         },
         {
           emit: 'event',
-          level: 'query'
-        }
-      ]
+          level: 'query',
+        },
+      ],
     });
   }
 

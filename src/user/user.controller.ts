@@ -1,33 +1,50 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { WebResponse } from '../model/web.model';
-import { LoginUserRequest, RegisterUserRequest, UpdateUserRequest, UserResponse } from '../model/user.model';
+import {
+  LoginUserRequest,
+  RegisterUserRequest,
+  UpdateUserRequest,
+  UserResponse,
+} from '../model/user.model';
 import { Auth } from '../common/auth.decorator';
 import { User } from '@prisma/client';
 
 @Controller('api/users')
 export class UserController {
-  constructor(private userService: UserService) {
-  }
+  constructor(private userService: UserService) {}
 
   @Post()
   @HttpCode(HttpStatus.OK)
-  async register(@Body() request: RegisterUserRequest): Promise<WebResponse<UserResponse>> {
+  async register(
+    @Body() request: RegisterUserRequest,
+  ): Promise<WebResponse<UserResponse>> {
     const result = await this.userService.register(request);
 
     return {
       data: result,
-    }
+    };
   }
 
   @Post('/login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() request: LoginUserRequest): Promise<WebResponse<UserResponse>> {
+  async login(
+    @Body() request: LoginUserRequest,
+  ): Promise<WebResponse<UserResponse>> {
     const result = await this.userService.login(request);
 
     return {
       data: result,
-    }
+    };
   }
 
   @Get('/current')
@@ -37,17 +54,20 @@ export class UserController {
 
     return {
       data: result,
-    }
+    };
   }
 
   @Patch('/current')
   @HttpCode(HttpStatus.OK)
-  async update(@Auth() user: User, @Body() request: UpdateUserRequest): Promise<WebResponse<UserResponse>> {
+  async update(
+    @Auth() user: User,
+    @Body() request: UpdateUserRequest,
+  ): Promise<WebResponse<UserResponse>> {
     const result = await this.userService.update(user, request);
 
     return {
       data: result,
-    }
+    };
   }
 
   @Delete('/current')
@@ -57,6 +77,6 @@ export class UserController {
 
     return {
       data: true,
-    }
+    };
   }
 }

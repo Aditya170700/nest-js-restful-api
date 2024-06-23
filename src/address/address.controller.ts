@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { AddressService } from './address.service';
 import { WebResponse } from '../model/web.model';
 import {
@@ -13,8 +24,7 @@ import { Auth } from '../common/auth.decorator';
 
 @Controller('/api/contacts/:contactId/addresses')
 export class AddressController {
-  constructor(private addressService: AddressService) {
-  }
+  constructor(private addressService: AddressService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -22,14 +32,13 @@ export class AddressController {
     @Auth() user: User,
     @Param('contactId', ParseIntPipe) contactId: number,
     @Body() request: CreateAddressRequest,
-  ): Promise<WebResponse<AddressResponse>>
-  {
+  ): Promise<WebResponse<AddressResponse>> {
     request.contact_id = contactId;
     const result = await this.addressService.create(user, request);
 
     return {
       data: result,
-    }
+    };
   }
 
   @Get('/:addressId')
@@ -38,8 +47,7 @@ export class AddressController {
     @Auth() user: User,
     @Param('contactId', ParseIntPipe) contactId: number,
     @Param('addressId', ParseIntPipe) addressId: number,
-  ): Promise<WebResponse<AddressResponse>>
-  {
+  ): Promise<WebResponse<AddressResponse>> {
     const request: GetAddressRequest = {
       address_id: addressId,
       contact_id: contactId,
@@ -49,7 +57,7 @@ export class AddressController {
 
     return {
       data: result,
-    }
+    };
   }
 
   @Put('/:addressId')
@@ -59,8 +67,7 @@ export class AddressController {
     @Param('contactId', ParseIntPipe) contactId: number,
     @Param('addressId', ParseIntPipe) addressId: number,
     @Body() request: UpdateAddressRequest,
-  ): Promise<WebResponse<AddressResponse>>
-  {
+  ): Promise<WebResponse<AddressResponse>> {
     request.id = addressId;
     request.contact_id = contactId;
 
@@ -68,7 +75,7 @@ export class AddressController {
 
     return {
       data: result,
-    }
+    };
   }
 
   @Delete('/:addressId')
@@ -77,8 +84,7 @@ export class AddressController {
     @Auth() user: User,
     @Param('contactId', ParseIntPipe) contactId: number,
     @Param('addressId', ParseIntPipe) addressId: number,
-  ): Promise<WebResponse<boolean>>
-  {
+  ): Promise<WebResponse<boolean>> {
     const request: RemoveAddressRequest = {
       address_id: addressId,
       contact_id: contactId,
@@ -88,7 +94,7 @@ export class AddressController {
 
     return {
       data: true,
-    }
+    };
   }
 
   @Get()
@@ -96,12 +102,11 @@ export class AddressController {
   async list(
     @Auth() user: User,
     @Param('contactId', ParseIntPipe) contactId: number,
-  ): Promise<WebResponse<AddressResponse[]>>
-  {
+  ): Promise<WebResponse<AddressResponse[]>> {
     const results = await this.addressService.list(user, contactId);
 
     return {
       data: results,
-    }
+    };
   }
 }

@@ -16,18 +16,16 @@ import { AuthMiddleware } from './auth.middleware';
     }),
     WinstonModule.forRoot({
       format: winston.format.json(),
-      transports: [
-        new winston.transports.Console(),
-      ]
-    })
+      transports: [new winston.transports.Console()],
+    }),
   ],
   providers: [
     PrismaService,
     ValidationService,
     {
       provide: APP_FILTER,
-      useClass: ErrorFilter
-    }
+      useClass: ErrorFilter,
+    },
   ],
   exports: [PrismaService, ValidationService],
 })

@@ -1,4 +1,9 @@
-import { createParamDecorator, ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  createParamDecorator,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 
 export const Auth = createParamDecorator(
   (data: unknown, context: ExecutionContext) => {
@@ -8,5 +13,5 @@ export const Auth = createParamDecorator(
     if (!user) throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 
     return user;
-  }
-)
+  },
+);
