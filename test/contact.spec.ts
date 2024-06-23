@@ -192,4 +192,60 @@ describe('ContactController', () => {
       expect(response.body.data.phone).toBe('0000');
     });
   });
+
+  describe('DELETE /api/contacts/:contactId', () => {
+    beforeEach(async () => {
+      await testService.createUser();
+      await testService.createContact();
+    });
+
+    afterEach(async () => {
+      await testService.deleteContact();
+      await testService.deleteUser();
+    });
+
+    it('Should be rejected if id not number', async () => {
+      const response = await request(app.getHttpServer())
+        .delete(`/api/contacts/one`)
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('Should be rejected if id not found', async () => {
+      const contact = await testService.getContact();
+      const response = await request(app.getHttpServer())
+        .delete(`/api/contacts/${contact.id + 1}`)
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('Should be able to remove contact', async () => {
+      const contact = await testService.getContact();
+      let response = await request(app.getHttpServer())
+        .delete(`/api/contacts/${contact.id}`)
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body.data).toBe(true);
+
+      response = await request(app.getHttpServer())
+        .get(`/api/contacts/${contact.id}`)
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      expect(response.body.errors).toBeDefined();
+    });
+  });
 });

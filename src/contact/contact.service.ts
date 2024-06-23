@@ -51,6 +51,19 @@ export class ContactService {
     return this.toContactResponse(result);
   }
 
+  async remove(user: User, contactId: number): Promise<ContactResponse> {
+    this.logger.debug(`[ContactService.remove] ${contactId}`);
+    let result = await this.checkContact(contactId, user.username);
+
+    result = (await this.prismaService.contact.delete({
+      where: {
+        id: result.id,
+      }
+    }) as Contact);
+
+    return this.toContactResponse(result);
+  }
+
   private toContactResponse(contact: Contact): ContactResponse {
     return {
       id: contact.id,
