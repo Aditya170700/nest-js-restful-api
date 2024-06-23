@@ -1,0 +1,128 @@
+### Register User
+POST http://localhost:3000/api/users
+Content-Type: application/json
+Accept: application/json
+
+{
+  "username": "aditya",
+  "password": "aditya",
+  "name": "Aditya"
+}
+
+### Login User
+POST http://localhost:3000/api/users/login
+Content-Type: application/json
+Accept: application/json
+
+{
+  "username": "aditya",
+  "password": "aditya"
+}
+
+### Get User
+GET http://localhost:3000/api/users/current
+Content-Type: application/json
+Accept: application/json
+Authorization: f7affabc-c057-4b1b-8cb1-2e3c3255e2d9
+
+### Logout User
+DELETE http://localhost:3000/api/users/current
+Content-Type: application/json
+Accept: application/json
+Authorization: f7affabc-c057-4b1b-8cb1-2e3c3255e2d9
+
+### Update User
+PATCH http://localhost:3000/api/users/current
+Content-Type: application/json
+Accept: application/json
+Authorization: f7affabc-c057-4b1b-8cb1-2e3c3255e2d9
+
+{
+  "name": "Aditya Ricki",
+  "username": "aditya",
+  "password": "aditya"
+}
+
+### Create Contact
+POST http://localhost:3000/api/contacts
+Content-Type: application/json
+Accept: application/json
+Authorization: f7affabc-c057-4b1b-8cb1-2e3c3255e2d9
+
+{
+  "first_name": "Erni",
+  "last_name": "Safitri",
+  "email": "aditya@ricki.com",
+  "phone": "089873168713"
+}
+
+### Update Contact
+PUT http://localhost:3000/api/contacts/686
+Content-Type: application/json
+Accept: application/json
+Authorization: f7affabc-c057-4b1b-8cb1-2e3c3255e2d9
+
+{
+  "first_name": "Aditya",
+  "last_name": "Ricki Julianto",
+  "email": "aditya@ricki.com",
+  "phone": "089873168713"
+}
+
+### Get Contact
+GET http://localhost:3000/api/contacts/686
+Accept: application/json
+Authorization: f7affabc-c057-4b1b-8cb1-2e3c3255e2d9
+
+### Delete Contact
+DELETE http://localhost:3000/api/contacts/686
+Accept: application/json
+Authorization: f7affabc-c057-4b1b-8cb1-2e3c3255e2d9
+
+### Search Contact
+GET http://localhost:3000/api/contacts?size=1&page=1&name=a&email=a&phone=0
+Accept: application/json
+Authorization: f7affabc-c057-4b1b-8cb1-2e3c3255e2d9
+
+### Create Address
+POST http://localhost:3000/api/contacts/686/addresses
+Content-Type: application/json
+Accept: application/json
+Authorization: f7affabc-c057-4b1b-8cb1-2e3c3255e2d9
+
+{
+  "street": "Jl. Sambirejo",
+  "city": "Gunungkidul",
+  "province": "DIY",
+  "country": "Indonesia",
+  "postal_code": "55853"
+}
+
+### Update Address
+PUT http://localhost:3000/api/contacts/686/addresses/120
+Content-Type: application/json
+Accept: application/json
+Authorization: f7affabc-c057-4b1b-8cb1-2e3c3255e2d9
+
+{
+  "street": "Jl. Sambirejo",
+  "city": "Gunungkidul",
+  "province": "Yogyakarta",
+  "country": "Indonesia",
+  "postal_code": "55853"
+}
+
+### Get Address
+GET http://localhost:3000/api/contacts/686/addresses/120
+Accept: application/json
+Authorization: f7affabc-c057-4b1b-8cb1-2e3c3255e2d9
+
+### Delete Address
+DELETE http://localhost:3000/api/contacts/686/addresses/120
+Accept: application/json
+Authorization: f7affabc-c057-4b1b-8cb1-2e3c3255e2d9
+
+### List Address
+GET http://localhost:3000/api/contacts/686/addresses
+Accept: application/json
+Authorization: f7affabc-c057-4b1b-8cb1-2e3c3255e2d9
