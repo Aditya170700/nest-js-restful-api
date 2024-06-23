@@ -147,7 +147,7 @@ export class ContactService {
     }
   }
 
-  private async checkContact(contactId: number, username: string): Promise<Contact> {
+  public async checkContact(contactId: number, username: string): Promise<Contact> {
     let result = (await this.prismaService.contact.findFirst({
       where: {
         id: contactId,
