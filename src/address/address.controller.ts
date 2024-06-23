@@ -1,7 +1,13 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { AddressService } from './address.service';
 import { WebResponse } from '../model/web.model';
-import { AddressResponse, CreateAddressRequest, GetAddressRequest, UpdateAddressRequest } from '../model/address.model';
+import {
+  AddressResponse,
+  CreateAddressRequest,
+  GetAddressRequest,
+  RemoveAddressRequest,
+  UpdateAddressRequest,
+} from '../model/address.model';
 import { User } from '@prisma/client';
 import { Auth } from '../common/auth.decorator';
 
@@ -62,6 +68,26 @@ export class AddressController {
 
     return {
       data: result,
+    }
+  }
+
+  @Delete('/:addressId')
+  @HttpCode(HttpStatus.OK)
+  async remove(
+    @Auth() user: User,
+    @Param('contactId', ParseIntPipe) contactId: number,
+    @Param('addressId', ParseIntPipe) addressId: number,
+  ): Promise<WebResponse<boolean>>
+  {
+    const request: RemoveAddressRequest = {
+      address_id: addressId,
+      contact_id: contactId,
+    };
+
+    await this.addressService.remove(user, request);
+
+    return {
+      data: true,
     }
   }
 }

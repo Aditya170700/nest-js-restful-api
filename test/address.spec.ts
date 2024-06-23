@@ -236,4 +236,61 @@ describe('AddressController', () => {
       expect(response.body.data.postal_code).toBe('00000');
     });
   });
+
+  describe('DELETE /api/contacts/:contactId/addresses/:addressId', () => {
+    beforeEach(async () => {
+      await testService.createUser();
+      await testService.createContact();
+      await testService.createAddress();
+    });
+
+    afterEach(async () => {
+      await testService.deleteAddress();
+      await testService.deleteContact();
+      await testService.deleteUser();
+    });
+
+    it('Should be rejected if contact is not found', async () => {
+      const contact = await testService.getContact();
+      const address = await testService.getAddress();
+      const response = await request(app.getHttpServer())
+        .delete(`/api/contacts/${contact.id + 1}/addresses/${address.id}`)
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('Should be rejected if address is not found', async () => {
+      const contact = await testService.getContact();
+      const address = await testService.getAddress();
+      const response = await request(app.getHttpServer())
+        .delete(`/api/contacts/${contact.id}/addresses/${address.id + 1}`)
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('Should be able to get address', async () => {
+      const contact = await testService.getContact();
+      let address = await testService.getAddress();
+      const response = await request(app.getHttpServer())
+        .delete(`/api/contacts/${contact.id}/addresses/${address.id}`)
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body.data).toBe(true);
+
+      address = await testService.getAddress();
+
+      expect(address).toBeNull();
+    });
+  });
 });

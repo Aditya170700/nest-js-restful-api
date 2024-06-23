@@ -3,7 +3,13 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { PrismaService } from '../common/prisma.service';
 import { ValidationService } from '../common/validation.service';
-import { AddressResponse, CreateAddressRequest, GetAddressRequest, UpdateAddressRequest } from '../model/address.model';
+import {
+  AddressResponse,
+  CreateAddressRequest,
+  GetAddressRequest,
+  RemoveAddressRequest,
+  UpdateAddressRequest,
+} from '../model/address.model';
 import { Address, User } from '@prisma/client';
 import { ContactService } from '../contact/contact.service';
 import { AddressValidation } from './address.validation';
@@ -40,17 +46,6 @@ export class AddressService {
     return this.toAddressResponse(address);
   }
 
-  private toAddressResponse(address: Address): AddressResponse {
-    return {
-      id: address.id,
-      street: address.street,
-      city: address.city,
-      province: address.province,
-      country: address.country,
-      postal_code: address.postal_code,
-    }
-  }
-
   async update(user: User, request: UpdateAddressRequest): Promise<AddressResponse> {
     this.logger.debug(`[AddressService.update] ${JSON.stringify(request)}`);
     const data = this.validationService.validate(AddressValidation.UPDATE, request);
@@ -65,6 +60,33 @@ export class AddressService {
     })) as Address;
 
     return this.toAddressResponse(address);
+  }
+
+  async remove(user: User, request: RemoveAddressRequest): Promise<AddressResponse> {
+    this.logger.debug(`[AddressService.remove] ${JSON.stringify(request)}`);
+    const data = this.validationService.validate(AddressValidation.REMOVE, request);
+    await this.contactService.checkContact(request.contact_id, user.username);
+    await this.checkAddress(data.address_id, data.contact_id);
+
+    const address = (await this.prismaService.address.delete({
+      where: {
+        id: data.address_id,
+        contact_id: data.contact_id
+      }
+    })) as Address;
+
+    return this.toAddressResponse(address);
+  }
+
+  private toAddressResponse(address: Address): AddressResponse {
+    return {
+      id: address.id,
+      street: address.street,
+      city: address.city,
+      province: address.province,
+      country: address.country,
+      postal_code: address.postal_code,
+    }
   }
 
   private async checkAddress(addressId: number, contactId: number): Promise<Address> {
