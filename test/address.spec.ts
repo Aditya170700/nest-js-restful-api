@@ -137,4 +137,103 @@ describe('AddressController', () => {
       expect(response.body.data.postal_code).toBe(address.postal_code);
     });
   });
+
+  describe('PUT /api/contacts/:contactId/addresses/:addressId', () => {
+    beforeEach(async () => {
+      await testService.createUser();
+      await testService.createContact();
+      await testService.createAddress();
+    });
+
+    afterEach(async () => {
+      await testService.deleteAddress();
+      await testService.deleteContact();
+      await testService.deleteUser();
+    });
+
+    it('Should be rejected if contact is not found', async () => {
+      const contact = await testService.getContact();
+      const address = await testService.getAddress();
+      const response = await request(app.getHttpServer())
+        .put(`/api/contacts/${contact.id + 1}/addresses/${address.id}`)
+        .set('Authorization', 'test')
+        .send({
+          street: 'test',
+          city: 'test',
+          province: 'test',
+          country: 'test',
+          postal_code: '12345',
+        });
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('Should be rejected if address is not found', async () => {
+      const contact = await testService.getContact();
+      const address = await testService.getAddress();
+      const response = await request(app.getHttpServer())
+        .put(`/api/contacts/${contact.id}/addresses/${address.id + 1}`)
+        .set('Authorization', 'test')
+        .send({
+          street: 'test',
+          city: 'test',
+          province: 'test',
+          country: 'test',
+          postal_code: '12345',
+        });
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('Should be rejected to update address if request invalid', async () => {
+      const contact = await testService.getContact();
+      const address = await testService.getAddress();
+      const response = await request(app.getHttpServer())
+        .put(`/api/contacts/${contact.id}/addresses/${address.id}`)
+        .set('Authorization', 'test')
+        .send({
+          street: '',
+          city: '',
+          province: '',
+          country: '',
+          postal_code: '',
+        });
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('Should be able to update address', async () => {
+      const contact = await testService.getContact();
+      const address = await testService.getAddress();
+      const response = await request(app.getHttpServer())
+        .put(`/api/contacts/${contact.id}/addresses/${address.id}`)
+        .set('Authorization', 'test')
+        .send({
+          street: 'test update',
+          city: 'test update',
+          province: 'test update',
+          country: 'test update',
+          postal_code: '00000',
+        });
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body.data.id).toBe(address.id);
+      expect(response.body.data.street).toBe('test update');
+      expect(response.body.data.city).toBe('test update');
+      expect(response.body.data.province).toBe('test update');
+      expect(response.body.data.country).toBe('test update');
+      expect(response.body.data.postal_code).toBe('00000');
+    });
+  });
 });

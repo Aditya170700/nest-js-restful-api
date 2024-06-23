@@ -3,7 +3,7 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { PrismaService } from '../common/prisma.service';
 import { ValidationService } from '../common/validation.service';
-import { AddressResponse, CreateAddressRequest, GetAddressRequest } from '../model/address.model';
+import { AddressResponse, CreateAddressRequest, GetAddressRequest, UpdateAddressRequest } from '../model/address.model';
 import { Address, User } from '@prisma/client';
 import { ContactService } from '../contact/contact.service';
 import { AddressValidation } from './address.validation';
@@ -35,14 +35,7 @@ export class AddressService {
     const data = this.validationService.validate(AddressValidation.GET, request);
     await this.contactService.checkContact(request.contact_id, user.username);
 
-    const address = (await this.prismaService.address.findFirst({
-      where: {
-        id: data.address_id,
-        contact_id: data.contact_id,
-      }
-    }) as Address);
-
-    if (!address) throw new HttpException('Address not found', HttpStatus.NOT_FOUND);
+    const address = await this.checkAddress(data.address_id, data.contact_id);
 
     return this.toAddressResponse(address);
   }
@@ -56,5 +49,34 @@ export class AddressService {
       country: address.country,
       postal_code: address.postal_code,
     }
+  }
+
+  async update(user: User, request: UpdateAddressRequest): Promise<AddressResponse> {
+    this.logger.debug(`[AddressService.update] ${JSON.stringify(request)}`);
+    const data = this.validationService.validate(AddressValidation.UPDATE, request);
+    await this.contactService.checkContact(request.contact_id, user.username);
+    let address = await this.checkAddress(data.id, data.contact_id);
+
+    address = (await this.prismaService.address.update({
+      where: {
+        id: address.id
+      },
+      data: data
+    })) as Address;
+
+    return this.toAddressResponse(address);
+  }
+
+  private async checkAddress(addressId: number, contactId: number): Promise<Address> {
+    const address = (await this.prismaService.address.findFirst({
+      where: {
+        id: addressId,
+        contact_id: contactId,
+      }
+    }) as Address);
+
+    if (!address) throw new HttpException('Address not found', HttpStatus.NOT_FOUND);
+
+    return address;
   }
 }
