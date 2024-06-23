@@ -3,9 +3,15 @@ import { PrismaService } from '../common/prisma.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { Contact, User } from '@prisma/client';
-import { ContactResponse, CreateContactRequest, UpdateContactRequest } from '../model/contact.model';
+import {
+  ContactResponse,
+  CreateContactRequest,
+  SearchContactRequest,
+  UpdateContactRequest,
+} from '../model/contact.model';
 import { ContactValidation } from './contact.validation';
 import { ValidationService } from '../common/validation.service';
+import { WebResponse } from '../model/web.model';
 
 @Injectable()
 export class ContactService {
@@ -62,6 +68,73 @@ export class ContactService {
     }) as Contact);
 
     return this.toContactResponse(result);
+  }
+
+  async search(user: User, request: SearchContactRequest): Promise<WebResponse<ContactResponse[]>> {
+    this.logger.debug(`[ContactService.search] ${JSON.stringify(request)}`);
+    const data = this.validationService.validate(ContactValidation.SEARCH, request);
+
+    const filters = [];
+
+    if (data.name) {
+      filters.push({
+        OR: [
+          {
+            first_name: {
+              contains: data.name,
+            }
+          },
+          {
+            last_name: {
+              contains: data.name,
+            }
+          }
+        ]
+      });
+    }
+
+    if (data.email) {
+      filters.push({
+        email: {
+          contains: data.email,
+        }
+      });
+    }
+
+    if (data.phone) {
+      filters.push({
+        phone: {
+          contains: data.phone,
+        }
+      });
+    }
+
+    const skip = (data.page - 1) * data.size;
+
+    const results = await this.prismaService.contact.findMany({
+      where: {
+        username: user.username,
+        AND: filters
+      },
+      take: data.size,
+      skip: skip,
+    });
+
+    const total =  await this.prismaService.contact.count({
+      where: {
+        username: user.username,
+        AND: filters
+      }
+    });
+
+    return {
+      data: results.map(contact => this.toContactResponse(contact)),
+      paging: {
+        current_page: data.page,
+        size: data.size,
+        total_page: Math.ceil(total / data.size),
+      }
+    }
   }
 
   private toContactResponse(contact: Contact): ContactResponse {
