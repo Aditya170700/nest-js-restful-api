@@ -78,6 +78,19 @@ export class AddressService {
     return this.toAddressResponse(address);
   }
 
+  async list(user: User, contactId: number): Promise<AddressResponse[]> {
+    this.logger.debug(`[AddressService.remove] ${user}`);
+    await this.contactService.checkContact(contactId, user.username);
+
+    const results = (await this.prismaService.address.findMany({
+      where: {
+        contact_id: contactId
+      }
+    })) as Address[];
+
+    return results.map(address => this.toAddressResponse(address));
+  }
+
   private toAddressResponse(address: Address): AddressResponse {
     return {
       id: address.id,
